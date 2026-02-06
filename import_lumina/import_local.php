@@ -217,7 +217,6 @@ foreach($datas as $ii =>$inifim)
         }
         $itudo++;
     }
-    file_put_contents("2-aluno_alunoinfo-$narquivo.sql",$arq);
     }
 
     if(!$reconstruido)
@@ -350,8 +349,6 @@ foreach($datas as $ii =>$inifim)
             }
             $itudo++;
         }
-
-    file_put_contents("3-arecurso-curso-cursocarga-conteudo-$narquivo.sql",$arq);
     }
     
     if(!$soReconstroi)
@@ -455,7 +452,6 @@ foreach($datas as $ii =>$inifim)
             }
             $itudo++;
         }
-        file_put_contents("5-papeis-usuarios-$narquivo.sql",$arq);
 
     }
 
@@ -499,7 +495,6 @@ foreach($datas as $ii =>$inifim)
         }
         $itudo++;
     }
-    file_put_contents("6-acessos-$narquivo.sql",$arq);
     
     }   
 
@@ -579,8 +574,6 @@ foreach($datas as $ii =>$inifim)
             }
             $itudo++;
         }
-    
-    file_put_contents("7-quiz-questao-$narquivo.sql",$arq);
     }
 
     if(!$soReconstroi)
@@ -621,7 +614,6 @@ foreach($datas as $ii =>$inifim)
         }
         $itudo++;
     }
-    file_put_contents("8-quiz_respostas-$narquivo.sql",$arq);
     }
 
     if(!$reconstruido)
@@ -690,7 +682,6 @@ foreach($datas as $ii =>$inifim)
             }
             $itudo++;
         }
-    file_put_contents("9-forum-forum_topico-$narquivo.sql",$arq);
     }
 
     if(!$soReconstroi)
@@ -731,9 +722,7 @@ foreach($datas as $ii =>$inifim)
             echo  "Error ao importar post (foruns)<br>";
         }
         $itudo++;
-
     }
-    file_put_contents("10-forumpost-$narquivo.sql",$arq);
 
 
 
@@ -771,7 +760,6 @@ foreach($datas as $ii =>$inifim)
             $res3 = #$conn_local->query($sql3);
             $itudo++;
         }
-        file_put_contents("11-atualiza-dados-$narquivo.sql",$arq);
 
     }
     $reconstruido=true;
@@ -801,7 +789,7 @@ $arq.=$sql3.";\n";
 $sql3 = "CALL gera_info()";
 $conn_local->query($sql3);
 $arq.=$sql3.";\n";
-file_put_contents("12-exec-procedimentos.sql",$arq);
+
 
 
 ?>
