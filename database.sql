@@ -50,19 +50,6 @@ CREATE TABLE `alunoinfo` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- =============================================
--- Tabela: `alunoinfo_sujo`
--- =============================================
-DROP TABLE IF EXISTS `alunoinfo_sujo`;
-CREATE TABLE `alunoinfo_sujo` (
-  `aluno_alunoId` bigint(20) NOT NULL,
-  `alunoInfoField` bigint(20) DEFAULT NULL,
-  `alunoInfoDescricao` varchar(100) DEFAULT NULL,
-  `alunoInfoValor` varchar(100) DEFAULT NULL,
-  `alunoInfoOrdem` int(11) NOT NULL,
-  KEY `fk_alunoInfo_aluno1_idx` (`aluno_alunoId`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- =============================================
 -- Tabela: `alunoinscricao`
 -- =============================================
 DROP TABLE IF EXISTS `alunoinscricao`;
@@ -303,8 +290,6 @@ CREATE TABLE `migration` (
   PRIMARY KEY (`version`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-INSERT INTO `migration` VALUES ('m000000_000000_base', 1770406810);
-
 -- =============================================
 -- Tabela: `pagina`
 -- =============================================
@@ -404,3 +389,74 @@ CREATE TABLE `usuario` (
   `usuarioDataCriacao` datetime DEFAULT NULL,
   PRIMARY KEY (`usuarioId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+-- =============================================
+-- Procedure: `atualiza_alunoinfo`
+-- =============================================
+CREATE DEFINER=`lumilab`@`%` PROCEDURE `atualiza_alunoinfo`()
+BEGIN
+update alunoinfo a set alunoInfoValor='Entre 20 e 30 anos',alunoInfoOrdem='1' where 
+alunoInfoValor in ('Entre 20 e 24 anos','Entre 25 e 29 anos','25 a 29 anos','de 18 a 29 anos','20 a 24 anos','15 a 29 anos','Entre 20 e 30 anos','Entre 20 e') and alunoInfoField=37;
+
+update alunoinfo a set alunoInfoValor='Entre 30 e 40 anos',alunoInfoOrdem='2' where 
+alunoInfoValor in ('Entre 30 e 34 anos','Entre 35 e 39 anos','30 a 34 anos','35 a 39 anos','de 30 a 39 anos','Entre 30 e 40 anos','Entre 30 e') and alunoInfoField=37;
+
+update alunoinfo a set alunoInfoValor='Mais de 40 anos',alunoInfoOrdem='3' where 
+alunoInfoValor in ('de 40 a 49 anos','acima de 50 anos','40 a 49 anos','de 50 a 59 anos','de 60 a 69 anos','mais de 50 anos','entre 40 e 50 anos','Mais de 40 anos','Mais de 40') and alunoInfoField=37;
+
+update alunoinfo a set alunoInfoValor='Menos de 20 anos',alunoInfoOrdem='0' where 
+alunoInfoValor in ('Menos que 19 anos','até 19 anos','15 a 19 anos','até 20 anos','até 19 anos','Menos de 20 anos','Menos de 19') and alunoInfoField=37;
+
+update alunoinfo a set alunoInfoValor='Branco',alunoInfoOrdem='0' where 
+alunoInfoValor in ('Branca','branco','branco/branca','branco/ branca','Branco') and alunoInfoField=38;
+
+update alunoinfo a set alunoInfoValor='Pardo/Preto',alunoInfoOrdem='1' where 
+alunoInfoValor in ('Parda, preta, mulata, mestiça','pardo','pardo/parda','pardo/ parda','preto','preto/preta','preto/ preta','Pardo/Preto') and alunoInfoField=38;
+
+update alunoinfo a set alunoInfoValor='Indígena',alunoInfoOrdem='2' where 
+alunoInfoValor in ('indígena') and alunoInfoField=38;
+
+
+update alunoinfo a set alunoInfoValor='Outra',alunoInfoOrdem='3' where 
+alunoInfoValor not in ('Indígena','Branco','Pardo/Preto') and alunoInfoField=38;
+
+
+update alunoinfo a set alunoInfoValor='Fundamental ou médio',alunoInfoOrdem='0' where (
+alunoInfoValor in ('Ensino fundamental ou médio completo','Fundamental ou médio') or alunoInfoValor like '%ensino fundamental%' or alunoInfoValor like '%ensino médio%') and alunoInfoField=36;
+
+update alunoinfo a set alunoInfoValor='Superior ou pós-grad',alunoInfoOrdem='1' where (
+alunoInfoValor in ('Pós graduação completa','Pós graduação em andamento','Superior completo','Superior em andamento','Superior ou pós-graduação','Superior ou pós-grad') or alunoInfoValor like '%pos-gradu%' or alunoInfoValor like '%especiali%' or alunoInfoValor like '%doutorado' or alunoInfoValor like '%doutorado%' or alunoInfoValor like '%graduação%' or alunoInfoValor like '%superior%' ) and alunoInfoField=36;
+
+
+update alunoinfo a set alunoInfoValor='Feminino',alunoInfoOrdem='1' where 
+alunoInfoValor in ('feminino','mulher cis','mulher cisgênero','Feminino') and alunoInfoField=34;
+
+update alunoinfo a set alunoInfoValor='Masculino',alunoInfoOrdem='0' where 
+alunoInfoValor in ('masculino','homem cis','homem cisgênero','Masculino') and alunoInfoField=34;
+
+update alunoinfo a set alunoInfoValor='Outro',alunoInfoOrdem='3' where 
+alunoInfoValor not in ('Masculino','Feminino') and alunoInfoField=34;
+
+
+
+update alunoinfo a set alunoInfoOrdem='20' where 
+alunoInfoValor in ('','Outro','Outras');
+
+update alunoinfo a set alunoInfoOrdem='20' where 
+alunoInfoValor is null;
+END;
+
+-- =============================================
+-- Procedure: `atualiza_perfil`
+-- =============================================
+CREATE DEFINER=`lumilab`@`%` PROCEDURE `atualiza_perfil`()
+BEGIN
+UPDATE aluno a,alunoinfo ai set a.racial = ai.alunoInfoValor where a.alunoId=ai.aluno_alunoId and ai.alunoInfoField=38;
+UPDATE aluno a,alunoinfo ai set a.escolaridade = ai.alunoInfoValor where a.alunoId=ai.aluno_alunoId and ai.alunoInfoField=36;
+UPDATE aluno a,alunoinfo ai set a.genero = ai.alunoInfoValor where a.alunoId=ai.aluno_alunoId and ai.alunoInfoField=34;
+UPDATE aluno a,alunoinfo ai set a.idade = ai.alunoInfoValor where a.alunoId=ai.aluno_alunoId and ai.alunoInfoField=37;
+END;
+
+-- =============================================
+-- Procedure: `gera_info`
+-- =============================================
+CREATE DEFINER=`lumilab`@`%` PROCEDURE `gera_info`() BEGIN DELETE FROM info; INSERT INTO info (infoDescricao, infoValor, infoField, infoOrdem) SELECT DISTINCT alunoInfoDescricao, CASE WHEN alunoInfoValor = '' THEN 'Nao respondido' ELSE alunoInfoValor END, alunoInfoField, alunoInfoOrdem FROM alunoinfo ORDER BY alunoInfoField, alunoInfoOrdem; END;

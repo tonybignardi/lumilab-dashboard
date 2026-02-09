@@ -35,7 +35,7 @@ class m260206_193936_init_database extends Migration
         }
 
         $sql = file_get_contents($filePath);
-        $statements = array_filter(array_map('trim', explode(';', $sql)));
+        $statements = $this->parseStatements($sql);
         
         echo "\n📋 Total de statements no arquivo: " . count($statements) . "\n";
         
@@ -91,5 +91,69 @@ class m260206_193936_init_database extends Migration
         
         echo "\n✓ Executed $count / " . count($statements) . " SQL statements\n";
         return true;
+    }
+    
+    /**
+     * Parse SQL statements correctly handling procedures
+     */
+    protected function parseStatements($sql)
+    {
+        $statements = [];
+        $current = '';
+        $inProcedure = false;
+        $procedureEnded = false;
+        
+        // Split by lines to process
+        $lines = explode("\n", $sql);
+        
+        foreach ($lines as $line) {
+            $trimmed = trim($line);
+            $upper = strtoupper($trimmed);
+            
+            // Check if we're starting a procedure
+            if (stripos($upper, 'CREATE DEFINER') !== false || stripos($upper, 'CREATE PROCEDURE') !== false) {
+                $inProcedure = true;
+                $procedureEnded = false;
+                if (!empty(trim($current))) {
+                    $statements[] = trim($current);
+                }
+                $current = '';
+            }
+            
+            if ($inProcedure) {
+                $current .= $line . "\n";
+                
+                // Check if this line has END followed by semicolon (procedure end)
+                if (stripos($line, 'END') !== false && stripos($line, ';') !== false) {
+                    $procedureEnded = true;
+                }
+                
+                // Only end procedure if we found END with semicolon
+                if ($procedureEnded) {
+                    $inProcedure = false;
+                    $statements[] = trim($current);
+                    $current = '';
+                    $procedureEnded = false;
+                }
+            } else {
+                // Regular statement
+                $current .= $line . "\n";
+                
+                // Check if statement ends with semicolon
+                if (!empty($trimmed) && substr($trimmed, -1) === ';' && stripos($upper, 'CREATE') === false) {
+                    $statements[] = trim($current);
+                    $current = '';
+                }
+            }
+        }
+        
+        // Add any remaining statement
+        if (!empty(trim($current))) {
+            $statements[] = trim($current);
+        }
+        
+        return array_filter($statements, function($s) {
+            return !empty(trim($s)) && trim($s) !== ';' && trim($s) !== 'END' && trim($s) !== 'END;';
+        });
     }
 }
